@@ -1,4 +1,4 @@
-import { createContext, useState, ReactNode } from "react";
+import { createContext, useState, ReactNode, useMemo } from "react";
 
 export type ToDos = {
     id: string;
@@ -9,10 +9,16 @@ export type ToDos = {
 
 export type ToDoContext = {
     toDos: ToDos[],
-    handleAddToDo: (task: string) => void
+    handleAddToDo: (task: string) => void     
     handleStatus : (id: string) => void
     handleDelete : (id: string) => void
+    handleEdit : (data: data) => void
 }
+
+ type data ={
+    id: string;
+    task: string;
+ }
 
 export const ToDoContext = createContext<ToDoContext | null>(null)
 
@@ -42,7 +48,7 @@ export const ToDoProvider = ({ children }: { children: ReactNode }) => {
                 return data
             })
             return newToDo
-        })
+        })  
     }
 
     const handleDelete =(id: string)=>{
@@ -52,7 +58,30 @@ export const ToDoProvider = ({ children }: { children: ReactNode }) => {
         })
     }
 
+
+    const handleEdit = (data : data ) => {
+        const {id, task} = data
+    setToDos((prev : ToDos[]) =>{
+        const newToDo = prev.map((data)=>{
+            if(data.id === id){
+                return {...data, task: task}
+            }
+            return data
+        })
+        return newToDo
+    })
+
+    }
+    const contextValue = useMemo(() => ({
+        toDos,
+        handleAddToDo,
+        handleStatus,
+        handleDelete,
+        handleEdit
+    }), [toDos]);
+
     return (
-        <ToDoContext.Provider value={{ toDos, handleAddToDo, handleStatus, handleDelete }} >{children}</ToDoContext.Provider>
+        <ToDoContext.Provider value={contextValue}>{children}</ToDoContext.Provider>
     )
 }
+
